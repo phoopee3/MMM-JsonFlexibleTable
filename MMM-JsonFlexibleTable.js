@@ -58,8 +58,8 @@ Module.register("MMM-JsonFlexibleTable", {
 		var tbody = document.createElement("tbody");
 		
 		var items = [];
-		if (this.config.arrayName) {
-			items = this.jsonData[this.config.arrayName];
+		if (this.config.iterator) {
+			items = this.jsonData[this.config.iterator];
 		}
 		else {
 			items = this.jsonData;
@@ -74,9 +74,15 @@ Module.register("MMM-JsonFlexibleTable", {
 
 		// create header row
 		if ( this.config.columns && this.config.columns.length ) {
+			var row = document.createElement("tr");
 			this.config.columns.forEach( elm => {
-				var row = document.createElement("tr");
+				var cell = document.createElement("td");
+				var cellText = document.createTextNode( elm.label );
+				cell.appendChild( cellText );
+				row.appendChild( cell );
 			});
+			thead.appendChild( row );
+			table.appendChild( thead );
 		}
 
 		items.forEach(element => {
@@ -91,35 +97,46 @@ Module.register("MMM-JsonFlexibleTable", {
 
 	getTableRow: function (jsonObject) {
 		var row = document.createElement("tr");
-		for (var key in jsonObject) {
-			var cell = document.createElement("td");
-			
-			var valueToDisplay = "";
-			if (key === "icon") {
-				cell.classList.add("fa", jsonObject[key]);
-			}
-			else if (this.config.tryFormatDate) {
-				valueToDisplay = this.getFormattedValue(jsonObject[key]);
-			}
-			else {
-				if ( this.config.keepColumns.length == 0 || this.config.keepColumns.indexOf(key) >= 0 ){
-					valueToDisplay = jsonObject[key];
+		// if columns are defined, loop over that
+		if ( this.config.columns && this.config.columns.length ) {
+			this.config.columns.forEach( elm => {
+				var cell = document.createElement("td");
+				var cellText = document.createTextNode( this.valueByPath( jsonObject, elm.name.split('.') ) );
+				cell.appendChild( cellText );
+				row.appendChild( cell );
+			});
+		// if no columns are defined, loop over the entire object
+		} else {
+			for (var key in jsonObject) {
+				var cell = document.createElement("td");
+				
+				var valueToDisplay = "";
+				if (key === "icon") {
+					cell.classList.add("fa", jsonObject[key]);
 				}
-			}
+				else if (this.config.tryFormatDate) {
+					valueToDisplay = this.getFormattedValue(jsonObject[key]);
+				}
+				else {
+					if ( this.config.keepColumns.length == 0 || this.config.keepColumns.indexOf(key) >= 0 ){
+						valueToDisplay = jsonObject[key];
+					}
+				}
 
-			var cellText = document.createTextNode(valueToDisplay);
+				var cellText = document.createTextNode(valueToDisplay);
 
-			if ( this.config.size > 0 && this.config.size < 9 ){
-				var h = document.createElement("H" + this.config.size );
-				h.appendChild(cellText)
-				cell.appendChild(h);
-			}
-			else
-			{
-				cell.appendChild(cellText);
-			}
+				if ( this.config.size > 0 && this.config.size < 9 ){
+					var h = document.createElement("H" + this.config.size );
+					h.appendChild(cellText)
+					cell.appendChild(h);
+				}
+				else
+				{
+					cell.appendChild(cellText);
+				}
 
-			row.appendChild(cell);
+				row.appendChild(cell);
+			}
 		}
 		return row;
 	},
@@ -138,6 +155,19 @@ Module.register("MMM-JsonFlexibleTable", {
 		}
 		else {
 			return input;
+		}
+	},
+
+	valueByPath: function ( jsonObject, path ) {
+		if ( path.length ) {
+			jsonObject = jsonObject[path.shift()];
+			if ( path.length && typeof jsonObject === 'object' && jsonObject !== null ) {
+				return this.valueByPath( jsonObject, path );
+			} else {
+				return jsonObject;
+			}
+		} else {
+			return jsonObject;
 		}
 	}
 
