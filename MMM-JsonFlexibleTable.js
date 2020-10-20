@@ -11,7 +11,9 @@ Module.register("MMM-JsonFlexibleTable", {
 		keepColumns   : [],
 		size          : 0,
 		tryFormatDate : false,
-		updateInterval: 15000
+		updateInterval: 15000,
+		method : "get",
+		body : null
 	},
 
 	start: function () {
@@ -28,7 +30,11 @@ Module.register("MMM-JsonFlexibleTable", {
 
 	// Request node_helper to get json from url
 	getJson: function () {
-		this.sendSocketNotification("MMM-JsonFlexibleTable_GET_JSON", this.config.url);
+		if ( this.config.method.toLowerCase() == 'post' ) {
+			this.sendSocketNotification("MMM-JsonFlexibleTable_GET_JSON", this.config.url, this.config.method, this.config.body);
+		} else {
+			this.sendSocketNotification("MMM-JsonFlexibleTable_GET_JSON", this.config.url);
+		}
 	},
 
 	socketNotificationReceived: function (notification, payload) {
