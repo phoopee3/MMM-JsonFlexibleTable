@@ -30,7 +30,7 @@ Module.register("MMM-JsonFlexibleTable", {
 
 	// Request node_helper to get json from url
 	getJson: function () {
-		if ( this.config.method.toLowerCase() == 'post' ) {
+		if ( this.config.method && this.config.method.toLowerCase() == 'post' ) {
 			this.sendSocketNotification("MMM-JsonFlexibleTable_GET_JSON", this.config.url, this.config.method, this.config.body);
 		} else {
 			this.sendSocketNotification("MMM-JsonFlexibleTable_GET_JSON", this.config.url);
@@ -106,8 +106,20 @@ Module.register("MMM-JsonFlexibleTable", {
 		// if columns are defined, loop over that
 		if ( this.config.columns && this.config.columns.length ) {
 			this.config.columns.forEach( elm => {
+				// console.log( jsonObject );
 				var cell = document.createElement("td");
-				var cellText = document.createTextNode( this.valueByPath( jsonObject, elm.name.split('.') ) );
+				var cellText = '';
+				if ( elm.name ) {
+					cellText = this.valueByPath(jsonObject, elm.name.split('.'));
+				} else {
+					cellText = jsonObject;
+				}
+				
+				// if there are keys defined on the column, do a lookup
+				if (elm.keys && elm.keys[cellText]) {
+					cellText = elm.keys[cellText];
+				}
+				cellText = document.createTextNode( cellText );
 				cell.appendChild( cellText );
 				row.appendChild( cell );
 			});
