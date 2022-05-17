@@ -106,7 +106,7 @@ Module.register("MMM-JsonFlexibleTable", {
 		// if columns are defined, loop over that
 		if ( this.config.columns && this.config.columns.length ) {
 			this.config.columns.forEach( elm => {
-				// console.log( jsonObject );
+				console.log( jsonObject );
 				var cell = document.createElement("td");
 				var cellText = '';
 				if ( elm.name ) {
@@ -125,36 +125,41 @@ Module.register("MMM-JsonFlexibleTable", {
 			});
 		// if no columns are defined, loop over the entire object
 		} else {
-			for (var key in jsonObject) {
-				var cell = document.createElement("td");
+			var cell = document.createElement("td");
+			var cellText = document.createTextNode(jsonObject);
+			cell.appendChild(cellText);
+			row.appendChild(cell);
+
+			// for (var key in jsonObject) {
+			// 	var cell = document.createElement("td");
 				
-				var valueToDisplay = "";
-				if (key === "icon") {
-					cell.classList.add("fa", jsonObject[key]);
-				}
-				else if (this.config.tryFormatDate) {
-					valueToDisplay = this.getFormattedValue(jsonObject[key]);
-				}
-				else {
-					if ( this.config.keepColumns.length == 0 || this.config.keepColumns.indexOf(key) >= 0 ){
-						valueToDisplay = jsonObject[key];
-					}
-				}
+			// 	var valueToDisplay = "";
+			// 	if (key === "icon") {
+			// 		cell.classList.add("fa", jsonObject[key]);
+			// 	}
+			// 	else if (this.config.tryFormatDate) {
+			// 		valueToDisplay = this.getFormattedValue(jsonObject[key]);
+			// 	}
+			// 	else {
+			// 		if ( this.config.keepColumns.length == 0 || this.config.keepColumns.indexOf(key) >= 0 ){
+			// 			valueToDisplay = jsonObject[key];
+			// 		}
+			// 	}
 
-				var cellText = document.createTextNode(valueToDisplay);
+			// 	var cellText = document.createTextNode(valueToDisplay);
 
-				if ( this.config.size > 0 && this.config.size < 9 ){
-					var h = document.createElement("H" + this.config.size );
-					h.appendChild(cellText)
-					cell.appendChild(h);
-				}
-				else
-				{
-					cell.appendChild(cellText);
-				}
+			// 	if ( this.config.size > 0 && this.config.size < 9 ){
+			// 		var h = document.createElement("H" + this.config.size );
+			// 		h.appendChild(cellText)
+			// 		cell.appendChild(h);
+			// 	}
+			// 	else
+			// 	{
+			// 		cell.appendChild(cellText);
+			// 	}
 
-				row.appendChild(cell);
-			}
+			// 	row.appendChild(cell);
+			// }
 		}
 		return row;
 	},
