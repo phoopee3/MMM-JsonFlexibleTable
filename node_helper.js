@@ -1,5 +1,8 @@
 var NodeHelper = require('node_helper');
-var request = require('request');
+
+const fetch = (...args) =>
+	// eslint-disable-next-line no-shadow
+	import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
 module.exports = NodeHelper.create({
 	start: function () {
@@ -9,23 +12,12 @@ module.exports = NodeHelper.create({
 	getJson: function (url, method = null, body = null) {
 		var self = this;
 
-		if ( method.toLowerCase() == 'post' ) {
-			request({ url: url, method: 'POST', body: body }, function (error, response, body) {
-				if (!error && response.statusCode == 200) {
-					var json = JSON.parse(body);
-					// Send the json data back with the url to distinguish it on the receiving part
-					self.sendSocketNotification("MMM-JsonFlexibleTable_JSON_RESULT", {url: url, data: json});
-				}
-			});
-		} else {
-			request({ url: url, method: 'GET' }, function (error, response, body) {
-				if (!error && response.statusCode == 200) {
-					var json = JSON.parse(body);
-					// Send the json data back with the url to distinguish it on the receiving part
-					self.sendSocketNotification("MMM-JsonFlexibleTable_JSON_RESULT", {url: url, data: json});
-				}
-			});
-		}
+		fetch(url)
+			.then( ( response ) => response.json() )
+			.then( ( json ) => {
+				self.sendSocketNotification("MMM-JsonFlexibleTable_JSON_RESULT", { url: url, data: json });
+			})
+		;
 	},
 
 	//Subclass socketNotificationReceived received.
